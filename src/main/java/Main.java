@@ -1,31 +1,24 @@
 public class Main {
-    public static void main(String[] args) {
-        String followerHandle = "@FredFlintstone";
-        String followeeHandle = "@ClintEastwood";
-        String followerName = "Fred Flintstone";
-        String followeeName = "Clint Eastwood";
+    static String hashKeyName = "follower_handle";
+    static String rangeKeyName = "followee_handle";
 
-        int uniqueCount = 25;
-        UniqueUsers uniqueFollowers = new UniqueUsers(followerHandle, followerName, uniqueCount);
-        UniqueUsers uniqueFollowees = new UniqueUsers(followeeHandle, followeeName, uniqueCount);
+    public static void main(String[] args) {
+        User defaultFollower = new User("@FredFlintstone", "Fred Flintstone");
+        User defaultFollowee = new User("@ClintEastwood", "Clint Eastwood");
 
         String tableName = "follows";
         String region = "us-west-2";
+        int pageSize = 10;
 
         DynamoDBFacade facade = new DynamoDBFacade(region);
 
         try {
-            facade.putByFollower(new User(followerHandle, followerName), uniqueFollowees.getUsers(), tableName);
-            facade.putByFollowee(uniqueFollowers.getUsers(), new User(followeeHandle, followeeName), tableName);
-
-            facade.get(tableName, "@FredFlintstone", "@ClintEastwood17");
-
-            facade.update(tableName, "@FredFlintstone", "@ClintEastwood5", "updated1", "updated2");
-
-            facade.delete(tableName, "@FredFlintstone", "@ClintEastwood17");
+            facade.getFolloweesByFollower(tableName, defaultFollower);
+            facade.getFollowersByFollowee(tableName, defaultFollowee);
+            facade.getPaginizedFolloweesByFollower(tableName, defaultFollower, pageSize);
+            facade.getPaginizedFollowersByFollowee(tableName, defaultFollowee, pageSize);
         }
         catch (Exception e) {
-            System.err.println("Unable to add item: " + followeeHandle + " follows " + followeeHandle);
             System.err.println(e.getMessage());
         }
     }
